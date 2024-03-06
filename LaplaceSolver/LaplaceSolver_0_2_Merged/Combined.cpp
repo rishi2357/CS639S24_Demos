@@ -1,11 +1,12 @@
 #include "Parameters.h"
+#include "Combined.h"
 
 #include <algorithm>
 #include <iostream>
 
 /* Passing p, z, r, r, */
 float Combined(const float (&u)[XDIM][YDIM][ZDIM], float (&Lu)[XDIM][YDIM][ZDIM], const float (&y)[XDIM][YDIM][ZDIM],
-    float (&z)[XDIM][YDIM][ZDIM], const float rho)
+    float (&z)[XDIM][YDIM][ZDIM], const float rho, float *nu)
 {   
     double result = 0.;
 
@@ -28,15 +29,15 @@ float Combined(const float (&u)[XDIM][YDIM][ZDIM], float (&Lu)[XDIM][YDIM][ZDIM]
     for (int k = 1; k < ZDIM-1; k++)
         result += (double) u[i][j][k] * (double) Lu[i][j][k];
     
-    float alpha = rho/(float)result;
+    float alpha = (-1) * rho/(float)result;
 
 #pragma omp parallel for reduction(max:result)
     for (int i = 1; i < XDIM-1; i++)
     for (int j = 1; j < YDIM-1; j++)
     for (int k = 1; k < ZDIM-1; k++)
     {
-        z[i][j][k] = Lu[i][j][k] * (-alpha) + y[i][j][k];
-        norm = std::max(norm, std::abs(Lu[i][j][k]));
+        z[i][j][k] = Lu[i][j][k] * alpha + y[i][j][k];
+        *nu = std::max(*nu, std::abs(z[i][j][k]));
     }
-    return norm, result;
+    return alpha;
 }

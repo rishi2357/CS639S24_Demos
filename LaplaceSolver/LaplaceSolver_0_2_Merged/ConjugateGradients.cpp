@@ -58,7 +58,7 @@ void ConjugateGradients(
     // Beginning of loop from Line 5
     for(int k=0;;k++)
     {
-        //std::cout << "Residual norm (nu) after " << k << " iterations = " << nu << std::endl;
+        std::cout << "Residual norm (nu) after " << k << " iterations = " << nu << std::endl;
 
         // Algorithm : Line 6
         // timerKernel.Restart(); ComputeLaplacian(p, z); timerKernel.Pause();
@@ -66,22 +66,20 @@ void ConjugateGradients(
 
         // timerKernel.Restart(); float sigma=InnerProduct(p, z); timerKernel.Pause();
         // time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
-
-        timerKernel.Restart(); float sigma = Combined(p, z, r, r, rho); timerKernel.Pause();
+        float nu = 0.;
+        
+        timerKernel.Restart(); float alpha = Combined(p, z, r, r, rho, &nu); timerKernel.Pause();
         time_CombinedLoop[k] = timerKernel.mElapsedTime;
 
         // // Algorithm : Line 7
-        float alpha=rho/sigma;
+        //float alpha=rho/sigma;
 
         // // Algorithm : Line 8
-        timerKernel.Restart(); Saxpy(z, r, r, -alpha); timerKernel.Pause();
-        time_SaxpyLoop[0][k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); Saxpy(z, r, r, -alpha); timerKernel.Pause();
+        // time_SaxpyLoop[0][k] = timerKernel.mElapsedTime;
         
-        timerKernel.Restart(); nu=Norm(r); timerKernel.Pause();
-        time_NormLoop[k] = timerKernel.mElapsedTime;
-
-        // timerKernel.Restart(); float nu, alpha = Combined(p, z, r, r, rho); timerKernel.Pause();
-        // time_CombinedLoop[k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); nu=Norm(r); timerKernel.Pause();
+        // time_NormLoop[k] = timerKernel.mElapsedTime;
 
         // Algorithm : Lines 9-12
         if (nu < nuMax || k == kMax) {
