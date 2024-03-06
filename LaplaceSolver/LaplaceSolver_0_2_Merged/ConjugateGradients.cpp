@@ -4,6 +4,7 @@
 #include "Reductions.h"
 #include "Utilities.h"
 #include "Timer.h"
+#include "Combined.h"
 
 #include <iostream>
 
@@ -24,6 +25,7 @@ extern elapsed_time_t time_SaxpyLoop[4][260];
 extern elapsed_time_t time_NormLoop[260];
 extern elapsed_time_t time_CopyLoop[260];
 extern elapsed_time_t time_InnerProductLoop[2][260];
+extern elapsed_time_t time_CombinedLoop[260];
 
 void ConjugateGradients(
     float (&x)[XDIM][YDIM][ZDIM],
@@ -59,21 +61,27 @@ void ConjugateGradients(
         //std::cout << "Residual norm (nu) after " << k << " iterations = " << nu << std::endl;
 
         // Algorithm : Line 6
-        timerKernel.Restart(); ComputeLaplacian(p, z); timerKernel.Pause();
-        time_ComputerLaplacianLoop[k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); ComputeLaplacian(p, z); timerKernel.Pause();
+        // time_ComputerLaplacianLoop[k] = timerKernel.mElapsedTime;
 
-        timerKernel.Restart(); float sigma=InnerProduct(p, z); timerKernel.Pause();
-        time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); float sigma=InnerProduct(p, z); timerKernel.Pause();
+        // time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
 
-        // Algorithm : Line 7
+        timerKernel.Restart(); float sigma = Combined(p, z, r, r, rho); timerKernel.Pause();
+        time_CombinedLoop[k] = timerKernel.mElapsedTime;
+
+        // // Algorithm : Line 7
         float alpha=rho/sigma;
 
-        // Algorithm : Line 8
+        // // Algorithm : Line 8
         timerKernel.Restart(); Saxpy(z, r, r, -alpha); timerKernel.Pause();
         time_SaxpyLoop[0][k] = timerKernel.mElapsedTime;
         
         timerKernel.Restart(); nu=Norm(r); timerKernel.Pause();
         time_NormLoop[k] = timerKernel.mElapsedTime;
+
+        // timerKernel.Restart(); float nu, alpha = Combined(p, z, r, r, rho); timerKernel.Pause();
+        // time_CombinedLoop[k] = timerKernel.mElapsedTime;
 
         // Algorithm : Lines 9-12
         if (nu < nuMax || k == kMax) {
@@ -89,7 +97,7 @@ void ConjugateGradients(
         time_CopyLoop[k] = timerKernel.mElapsedTime;
 
         timerKernel.Restart(); float rho_new = InnerProduct(z, r); timerKernel.Pause();
-        time_InnerProductLoop[1][k] = timerKernel.mElapsedTime;
+        time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
 
         // Algorithm : Line 14
         float beta = rho_new/rho;

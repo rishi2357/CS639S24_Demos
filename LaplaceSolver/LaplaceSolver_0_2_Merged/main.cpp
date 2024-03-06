@@ -23,6 +23,7 @@ elapsed_time_t time_SaxpyLoop[4][260];
 elapsed_time_t time_NormLoop[260];
 elapsed_time_t time_CopyLoop[260];
 elapsed_time_t time_InnerProductLoop[2][260];
+elapsed_time_t time_CombinedLoop[260];
 
 /* Cumulative time capture */
 double time_ComputeLaplacian;
@@ -31,6 +32,7 @@ double time_Norm;
 double time_Copy;
 double time_InnerProduct;
 double time_ComputedTotal;
+double time_Combined;
 
 int main(int argc, char *argv[])
 {
@@ -84,15 +86,15 @@ int main(int argc, char *argv[])
                          time_CopySingle.count() + time_InnerProductSingle.count();
 
     /* Compute cumulative time for iterated function call durations */
-    /* Compute Laplacian */
-    time_ComputeLaplacian = double(0.);
+    /* Combined Kernel */
+    time_Combined = double(0.);
     #pragma omp parallel for reduction(+:time_ComputeLaplacian)
     for(int i=0; i<260; i++)
-        time_ComputeLaplacian += time_ComputerLaplacianLoop[i].count();
+        time_Combined += time_CombinedLoop[i].count();
 
-    std::cout << "Cumulative ComputeLaplacian time across all iterations = " << time_ComputeLaplacian << "ms" << std::endl;
+    std::cout << "Cumulative Combined Kernel time across all iterations = " << time_Combined << "ms" << std::endl;
 
-    time_ComputedTotal += time_ComputeLaplacian;
+    time_ComputedTotal += time_Combined;
 
     /* 1st SAXPY call */
     time_Saxpy = double(0.);
@@ -165,14 +167,14 @@ int main(int argc, char *argv[])
     time_ComputedTotal += time_InnerProduct;
 
     /* 2nd InnerProduct call */
-    time_InnerProduct = double(0.);
-    #pragma omp parallel for reduction(+:time_InnerProduct)
-    for(int i=0; i<260; i++)
-        time_InnerProduct += time_InnerProductLoop[1][i].count();
+    // time_InnerProduct = double(0.);
+    // #pragma omp parallel for reduction(+:time_InnerProduct)
+    // for(int i=0; i<260; i++)
+    //     time_InnerProduct += time_InnerProductLoop[1][i].count();
 
-    std::cout << "Cumulative 2nd Inner Product time across all iterations = " << time_InnerProduct << "ms" << std::endl;
+    // std::cout << "Cumulative 2nd Inner Product time across all iterations = " << time_InnerProduct << "ms" << std::endl;
 
-    time_ComputedTotal += time_InnerProduct;
+    // time_ComputedTotal += time_InnerProduct;
 
     std::cout << "Cumulative computed time = " << time_ComputedTotal << "ms" << std::endl;
 
