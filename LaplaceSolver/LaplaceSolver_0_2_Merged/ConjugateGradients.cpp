@@ -4,6 +4,7 @@
 #include "Reductions.h"
 #include "Utilities.h"
 #include "Timer.h"
+#include "Combined.h"
 
 #include <iostream>
 
@@ -59,10 +60,13 @@ void ConjugateGradients(
         //std::cout << "Residual norm (nu) after " << k << " iterations = " << nu << std::endl;
 
         // Algorithm : Line 6
-        timerKernel.Restart(); ComputeLaplacian(p, z); timerKernel.Pause();
-        time_ComputerLaplacianLoop[k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); ComputeLaplacian(p, z); timerKernel.Pause();
+        // time_ComputerLaplacianLoop[k] = timerKernel.mElapsedTime;
 
-        timerKernel.Restart(); float sigma=InnerProduct(p, z); timerKernel.Pause();
+        // timerKernel.Restart(); float sigma=InnerProduct(p, z); timerKernel.Pause();
+        // time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
+
+        timerKernel.Restart(); float sigma=Combined_CL_IP(p, z); timerKernel.Pause();
         time_InnerProductLoop[0][k] = timerKernel.mElapsedTime;
 
         // Algorithm : Line 7
@@ -85,12 +89,14 @@ void ConjugateGradients(
         }
             
         // Algorithm : Line 13
-        timerKernel.Restart(); Copy(r, z); timerKernel.Pause();
-        time_CopyLoop[k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); Copy(r, z); timerKernel.Pause();
+        // time_CopyLoop[k] = timerKernel.mElapsedTime;
 
-        timerKernel.Restart(); float rho_new = InnerProduct(z, r); timerKernel.Pause();
+        // timerKernel.Restart(); float rho_new = InnerProduct(z, r); timerKernel.Pause();
+        // time_InnerProductLoop[1][k] = timerKernel.mElapsedTime;
+
+        timerKernel.Restart(); float rho_new = CombinedCopyIP(r, z); timerKernel.Pause();
         time_InnerProductLoop[1][k] = timerKernel.mElapsedTime;
-
         // Algorithm : Line 14
         float beta = rho_new/rho;
 
@@ -98,11 +104,13 @@ void ConjugateGradients(
         rho=rho_new;
 
         // Algorithm : Line 16
-        timerKernel.Restart(); Saxpy(p, x, x, alpha); timerKernel.Pause();
+        timerKernel.Restart(); CombinedSaxpy(p, x, r, alpha, beta); timerKernel.Pause();
         time_SaxpyLoop[1][k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); Saxpy(p, x, x, alpha); timerKernel.Pause();
+        // time_SaxpyLoop[1][k] = timerKernel.mElapsedTime;
 
-        timerKernel.Restart(); Saxpy(p, r, p, beta); timerKernel.Pause();
-        time_SaxpyLoop[2][k] = timerKernel.mElapsedTime;
+        // timerKernel.Restart(); Saxpy(p, r, p, beta); timerKernel.Pause();
+        // time_SaxpyLoop[2][k] = timerKernel.mElapsedTime;
 
         if (writeIterations) WriteAsImage("x", x, k, 0, 127);
     }

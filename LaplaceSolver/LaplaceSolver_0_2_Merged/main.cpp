@@ -167,14 +167,14 @@ int main(int argc, char *argv[])
     time_ComputedTotal += time_InnerProduct;
 
     /* 2nd InnerProduct call */
-    // time_InnerProduct = double(0.);
-    // #pragma omp parallel for reduction(+:time_InnerProduct)
-    // for(int i=0; i<260; i++)
-    //     time_InnerProduct += time_InnerProductLoop[1][i].count();
+    time_InnerProduct = double(0.);
+    #pragma omp parallel for reduction(+:time_InnerProduct)
+    for(int i=0; i<260; i++)
+        time_InnerProduct += time_InnerProductLoop[1][i].count();
 
-    // std::cout << "Cumulative 2nd Inner Product time across all iterations = " << time_InnerProduct << "ms" << std::endl;
+    std::cout << "Cumulative 2nd Inner Product time across all iterations = " << time_InnerProduct << "ms" << std::endl;
 
-    // time_ComputedTotal += time_InnerProduct;
+    time_ComputedTotal += time_InnerProduct;
 
     std::cout << "Cumulative computed time = " << time_ComputedTotal << "ms" << std::endl;
 
