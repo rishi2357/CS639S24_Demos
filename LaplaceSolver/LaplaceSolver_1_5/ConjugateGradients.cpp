@@ -44,13 +44,15 @@ void ConjugateGradients(
         float alpha=rho/sigma;
 
         // Algorithm : Line 8
-        Saxpy(z, r, r, -alpha);
+        //Saxpy(z, r, r, -alpha);
+	Saxpy(z, r, -alpha);
         nu=Norm(r);
 
         // Algorithm : Lines 9-12
         if (nu < nuMax || k == kMax) {
-            Saxpy(p, x, x, alpha);
-            std::cout << "Conjugate Gradients terminated after " << k << " iterations; residual norm (nu) = " << nu << std::endl;
+            //Saxpy(p, x, x, alpha);
+            Saxpy(p, x, alpha);
+	    std::cout << "Conjugate Gradients terminated after " << k << " iterations; residual norm (nu) = " << nu << std::endl;
             if (writeIterations) WriteAsImage("x", x, k, 0, 127);
             return;
         }

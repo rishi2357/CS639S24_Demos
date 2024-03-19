@@ -10,5 +10,5 @@ void ConjugateGradients(
     float (&p)[XDIM][YDIM][ZDIM],
     float (&r)[XDIM][YDIM][ZDIM],
     float (&z)[XDIM][YDIM][ZDIM],
-    const bool writeIterations = true);
+    const bool writeIterations = false);
 
