@@ -8,6 +8,7 @@ Timer timerLaplacian;
 Timer timerSaxpy;
 Timer timerCopy;
 Timer timerInnerProduct;
+Timer timerNorm;
 Timer timerConjugateGradient;
 
 int main(int argc, char *argv[])
@@ -40,18 +41,20 @@ int main(int argc, char *argv[])
     // Call Conjugate Gradients algorithm
     {	
 	timerIteration.Reset(); timerConjugateGradient.Reset();
-        timerLaplacian.Reset(); timerSaxpy.Reset();
+    timerLaplacian.Reset(); timerSaxpy.Reset();
 	timerCopy.Reset(); timerInnerProduct.Reset();
+    timerNorm.Reset();
 
 	timerConjugateGradient.Restart();
-        ConjugateGradients(matrix, x, f, p, r, z, false);
+    ConjugateGradients(matrix, x, f, p, r, z, false);
 	timerConjugateGradient.Pause();
 
 	timerConjugateGradient.Print("Total CG Time : ");
-        timerLaplacian.Print("Total Laplacian Time : ");
-        timerSaxpy.Print("Total Saxpy Time : ");
+    timerLaplacian.Print("Total Laplacian Time : ");
+    timerSaxpy.Print("Total Saxpy Time : ");
 	timerCopy.Print("Total Copy Time: ");
 	timerInnerProduct.Print("Total Inner Product Time: ");
+    timerNorm.Print("Total Norm TIme : ");
     }
 
     return 0;
