@@ -19,12 +19,11 @@ float Norm(const float (&x)[XDIM][YDIM][ZDIM])
     for (int k = 1; k < ZDIM-1; k++)
         result = std::max(result, std::abs(x[i][j][k]));
 #endif
-
 #ifndef DO_NOT_USE_MKL
     auto index = cblas_isamax(XDIM*YDIM*ZDIM,
                          &x[0][0][0],
 	                 1U);
-    result = x_flat[index-1U];
+    result = std::abs(x_flat[index]);
 #endif
     return result;
 }
