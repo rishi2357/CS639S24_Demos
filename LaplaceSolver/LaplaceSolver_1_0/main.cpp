@@ -3,7 +3,12 @@
 #include "Timer.h"
 #include "Utilities.h"
 
+Timer timerIteration;
 Timer timerLaplacian;
+Timer timerSaxpy;
+Timer timerCopy;
+Timer timerInnerProduct;
+Timer timerConjugateGradient;
 
 int main(int argc, char *argv[])
 {
@@ -33,9 +38,19 @@ int main(int argc, char *argv[])
     }
 
     // Call Conjugate Gradients algorithm
-    timerLaplacian.Reset();
+    timerIteration.Reset(); timerConjugateGradient.Reset();
+    timerLaplacian.Reset(); timerSaxpy.Reset();
+    timerCopy.Reset(); timerInnerProduct.Reset();
+
+    timerConjugateGradient.Restart();
     ConjugateGradients(matrix, x, f, p, r, z, false);
+    timerConjugateGradient.Pause();
+
+    timerConjugateGradient.Print("Total CG Time : ");
     timerLaplacian.Print("Total Laplacian Time : ");
+    timerSaxpy.Print("Total Saxpy Time : ");
+    timerCopy.Print("Total Copy Time : ");
+    timerInnerProduct.Print("Total Inner Product Time : ");
 
     return 0;
 }
