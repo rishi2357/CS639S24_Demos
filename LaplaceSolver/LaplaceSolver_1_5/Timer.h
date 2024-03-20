@@ -13,10 +13,12 @@ struct Timer
     time_point_t mStartTime;
     time_point_t mStopTime;
     elapsed_time_t mElapsedTime;
-    
+    elapsed_time_t mGlobalElapsedTime;
+
     void Start()
     {
-        mElapsedTime = elapsed_time_t::zero();
+        mGlobalElapsedTime = elapsed_time_t::zero();
+	mElapsedTime = elapsed_time_t::zero();
         mStartTime = clock_t::now();
     }
     
@@ -40,12 +42,13 @@ struct Timer
     void Pause()
     {
         mStopTime = clock_t::now();
-        mElapsedTime += mStopTime-mStartTime;
+        mElapsedTime = mStopTime-mStartTime;
+        mGlobalElapsedTime += mStopTime-mStartTime;
     }
 
     void Print(const std::string& msg)
     {
-        std::cout << "[" << msg << mElapsedTime.count() << "ms]" << std::endl;
+        std::cout << "[" << msg << mGlobalElapsedTime.count() << "ms]" << std::endl;
     }
     
 };
