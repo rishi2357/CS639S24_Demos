@@ -10,7 +10,6 @@
 float Norm(const float (&x)[XDIM][YDIM][ZDIM])
 {
     float result = 0.;
-    int index = 0;
     const float* x_flat = reinterpret_cast<const float*>(x);
         
 #ifdef DO_NOT_USE_MKL    
@@ -22,10 +21,10 @@ float Norm(const float (&x)[XDIM][YDIM][ZDIM])
 #endif
 
 #ifndef DO_NOT_USE_MKL
-    index = cblas_isamax(XDIM*YDIM*ZDIM,
-                         &x_flat[0],
+    auto index = cblas_isamax(XDIM*YDIM*ZDIM,
+                         &x[0][0][0],
 	                 1U);
-    result = x_flat[index-1];
+    result = x_flat[index-1U];
 #endif
     return result;
 }

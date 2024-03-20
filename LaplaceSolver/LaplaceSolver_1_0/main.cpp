@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     timerSaxpy.Print("Total Saxpy Time : ");
     timerCopy.Print("Total Copy Time : ");
     timerInnerProduct.Print("Total Inner Product Time : ");
-    timerNorm.Print("Total Norm TIme : ");
+    timerNorm.Print("Total Norm Time : ");
     
     return 0;
 }
