@@ -4,6 +4,9 @@
 #include "mkl.h"
 
 #include <iostream>
+#include <memory>
+#include <numeric>
+#include <array>
 
 void DirectSparseSolver(
     CSRMatrix& matrix,
@@ -11,20 +14,46 @@ void DirectSparseSolver(
     float (&f)[XDIM][YDIM][ZDIM],
     const bool writeOutput)
 {
-    MKL_INT n = matrix.mSize; // Matrix size
+    const MKL_INT n = matrix.mSize; // Matrix size
     MKL_INT mtype = 2;        // Real symmetric positive definite matrix
-    MKL_INT nrhs = 1;         // Number of right hand sides
+    const MKL_INT nrhs = 100;  // Number of right hand sides
     void *pt[64];             // Internal solver memory pointer pt
                               // should be "int" when using 32-bit architectures, or "long int"
                               // for 64-bit architectures. void* should be OK in both cases
     MKL_INT iparm[64];        // Pardiso control parameters
     MKL_INT maxfct, mnum, phase, error, msglvl;
-    MKL_INT i;
+    MKL_INT rhs, i,j,k;
     float ddum;               // Scalar dummy (PARDISO needs it)
     MKL_INT idum;             // Integer dummy (PARDISO needs it)
-    
-    // Set-up PARDISO control parameters
 
+    //std::vector<std::vector<std::vector<float>>> bMultiple[nrhs];
+    //std::vector<std::vector<std::vector<float>>> xMultiple[nrhs];
+    using array_4d = std::array<std::array<std::array<std::array<float, ZDIM>, YDIM>, XDIM>,\
+                     std::size_t(nrhs)>;
+
+    std::unique_ptr<array_4d> bMultiplePtr = std::make_unique<array_4d>();
+    std::unique_ptr<array_4d> xMultiplePtr = std::make_unique<array_4d>();
+
+    array_4d& bMultiple = *bMultiplePtr;
+    array_4d& xMultiple = *xMultiplePtr;
+
+    // Fill the vector with consecutive values starting from 0
+    //std::iota(perm.begin(), perm.end(), 0);
+    /* Make multiple right-hand sides */
+    for (rhs=0; rhs<nrhs; rhs++)
+        for(i=0; i<XDIM; i++)
+            for(j=0; j<YDIM; j++)
+                for(k=0; k<ZDIM; k++)
+                    bMultiple[rhs][i][j][k] = f[i][j][k];
+
+    /* Make multiple unknowns(x) */
+    for (rhs=0; rhs<nrhs; rhs++)
+        for(i=0; i<XDIM; i++)
+            for(j=0; j<YDIM; j++)
+                for(k=0; k<ZDIM; k++)
+                    xMultiple[rhs][i][j][k] = x[i][j][k];
+
+    // Set-up PARDISO control parameters
     for ( i = 0; i < 64; i++ )
     {
         iparm[i] = 0;
@@ -93,7 +122,7 @@ void DirectSparseSolver(
     iparm[7] = 0;         // Max numbers of iterative refinement steps
     PARDISO (pt, &maxfct, &mnum, &mtype, &phase, &n,
         matrix.GetValues(), matrix.GetRowOffsets(), matrix.GetColumnIndices(),
-        &idum, &nrhs, iparm, &msglvl, static_cast<void*>(&f[0][0][0]), &x[0][0][0], &error);
+        &idum, &nrhs, iparm, &msglvl, static_cast<void*>(&bMultiple[0][0][0][0]), &xMultiple[0][0][0][0], &error);
     if ( error != 0 )
         throw std::runtime_error("PARDISO error during solution phase");
 
@@ -105,5 +134,6 @@ void DirectSparseSolver(
         &ddum, matrix.GetRowOffsets(), matrix.GetColumnIndices(),
         &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
 
-    if (writeOutput) WriteAsImage("x", x, 0, 0, XDIM/2);
+    for(rhs=0; rhs<nrhs; rhs++)
+        if (writeOutput) WriteAsImage("x", (float (&) [XDIM][YDIM][ZDIM])xMultiple[rhs], 0, 0, XDIM/2);
 }
